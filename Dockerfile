@@ -1,18 +1,26 @@
 #
-# Development image (testing tools included)
+# Base image
 #
 
-FROM elfalem/beets-docker:base
+FROM debian:latest
 MAINTAINER elfalem <elfalem@gmail.com>
 
-#dev tools
-RUN pip install tox sphinx nose
+RUN apt-get update
+RUN apt-get install -y python python-pip vim sudo
 
-#dev dependencies
-RUN pip install beautifulsoup4 flask mock pylast rarfile responses pyxdg pathlib python-mpd2 discogs-client
+ENV BEETSDIR /config
+ENV EDITOR vim
 
-WORKDIR /code
+RUN useradd -m beets
 
-USER beets
+#allow sudo
+RUN echo beets:beets | chpasswd
+RUN usermod -a -G sudo beets
 
+#volumes
+RUN mkdir /config
+RUN mkdir /downloads
+RUN ln -s /home/beets/Music /music
 
+#install beets dependencies
+RUN pip install jellyfish mutagen munkres unidecode pyyaml musicbrainzngs
